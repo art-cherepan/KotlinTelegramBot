@@ -15,23 +15,19 @@ fun main() {
 
         val userAnswer = readln().toIntOrNull()
 
-        val output = when (userAnswer) {
-            1 -> "Выбран пункт \"Учить слова\""
-            2 -> "Выбран пункт \"Статистика\""
-            0 -> "exit"
-            else -> "Введите число 1, 2 или 0"
+        when (userAnswer) {
+            1 -> println("Выбран пункт \"Учить слова\"")
+            2 -> println("Выбран пункт \"Статистика\"")
+            0 -> return
+            else -> println("Введите число 1, 2 или 0")
         }
-
-        if (output == "exit") break
-
-        println(output)
     }
 }
 
 data class Word(
     val original: String,
     val translate: String,
-    val correctAnswersCount: Int,
+    val correctAnswersCount: Int = 0,
 )
 
 fun loadDictionary(): List<Word> {
