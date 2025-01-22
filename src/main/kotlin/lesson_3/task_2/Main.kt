@@ -2,6 +2,9 @@ package lesson_3.task_2
 
 import java.io.File
 
+const val CORRECT_ANSWER_COUNT_FOR_LEARNED = 3
+const val MAX_PERCENT = 100
+
 fun main() {
     while (true) {
         println("""
@@ -50,8 +53,8 @@ fun loadDictionary(): List<Word> {
 fun getStatistic(): String {
     val dictionary = loadDictionary()
     val totalCount = dictionary.count()
-    val learnedCount = dictionary.filter { it.correctAnswersCount >= 3 }
-    val learnedCountPercent = learnedCount.count() * 100 / totalCount
+    val learnedCount = dictionary.filter { it.correctAnswersCount >= CORRECT_ANSWER_COUNT_FOR_LEARNED }
+    val learnedCountPercent = learnedCount.count() * MAX_PERCENT / totalCount
 
     return "Выучено ${learnedCount.count()} из $totalCount слов | $learnedCountPercent%"
 }
