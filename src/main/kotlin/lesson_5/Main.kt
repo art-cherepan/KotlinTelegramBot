@@ -1,5 +1,8 @@
 package lesson_5
 
+const val LEARNED_ANSWER_COUNT = 3
+const val COUNT_OF_QUESTION_WORDS = 4
+
 fun Question.asConsoleString(): String {
     val variants = this.variants
         .mapIndexed { index: Int, word: Word -> " ${index + 1} - ${word.translate}"  }
@@ -10,7 +13,7 @@ fun Question.asConsoleString(): String {
 
 fun main() {
     val trainer = try {
-        LearnWordsTrainer(learnedAnswerCount = 3, countOfQuestionWords = 4)
+        LearnWordsTrainer(learnedAnswerCount = LEARNED_ANSWER_COUNT, countOfQuestionWords = COUNT_OF_QUESTION_WORDS)
     } catch (e: Exception) {
         println("Невозможно загрузить словарь")
 
