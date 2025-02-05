@@ -5,20 +5,33 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
+const val UPDATES_SEPARATOR_LENGTH = 11
+const val GET_UPDATES_DELAY_MILLISECONDS = 2000
+
 fun main(args: Array<String>) {
+    var updateId = 0
 
-    val botToken = args[0]
-    val urlGetMe = "https://api.telegram.org/bot$botToken/getMe"
-    val urlGetUpdates = "https://api.telegram.org/bot$botToken/getUpdates"
+    while (true) {
+        Thread.sleep(GET_UPDATES_DELAY_MILLISECONDS.toLong())
+        val updates: String = getUpdates(args[0], updateId)
 
+        println(updates)
+
+        val startUpdateId = updates.lastIndexOf("update_id")
+        val endUpdateId = updates.lastIndexOf(",\n\"message\"")
+
+        if (startUpdateId == -1 || endUpdateId == -1) continue
+
+        val updateIdString = updates.substring(startUpdateId + UPDATES_SEPARATOR_LENGTH, endUpdateId)
+        updateId = updateIdString.toInt() + 1
+    }
+}
+
+fun getUpdates(botToken: String, updateId: Int): String {
     val client: HttpClient = HttpClient.newBuilder().build()
+    val urlGetUpdates = "https://api.telegram.org/bot$botToken/getUpdates?offset=$updateId"
+    val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
+    val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
 
-    val requestGetMe: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetMe)).build()
-    val requestGetUpdates: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
-
-    val responseGetMe: HttpResponse<String> = client.send(requestGetMe, HttpResponse.BodyHandlers.ofString())
-    val responseGetUpdates: HttpResponse<String> = client.send(requestGetUpdates, HttpResponse.BodyHandlers.ofString())
-
-    println("Информация о боте: ${responseGetMe.body()}")
-    println("Список обновлений: ${responseGetUpdates.body()}")
+    return response.body()
 }
