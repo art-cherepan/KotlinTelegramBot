@@ -1,43 +1,44 @@
 package lesson_7
 
-import java.net.URI
 import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 
-const val UPDATES_SEPARATOR_LENGTH = 11
 const val GET_UPDATES_DELAY_MILLISECONDS = 2000
 
 fun main(args: Array<String>) {
     var updateId = 0
     val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
+    val updateIdRegex: Regex = "\"update_id\":(.+?),".toRegex()
+    val chatIdRegex: Regex = "\"id\":(.+?),".toRegex()
+
+    val client: HttpClient = HttpClient.newBuilder().build()
+    val telegramBotService = TelegramBotService(
+        client = client,
+        botToken = args[0],
+    )
 
     while (true) {
         Thread.sleep(GET_UPDATES_DELAY_MILLISECONDS.toLong())
-        val updates: String = getUpdates(args[0], updateId)
+        val updates: String = telegramBotService.getUpdates(updateId)
 
         println(updates)
 
-        val startUpdateId = updates.lastIndexOf("update_id")
-        val endUpdateId = updates.lastIndexOf(",\n\"message\"")
+        val matchUpdateIdResult: MatchResult? = updateIdRegex.find(updates)
+        val updateIdMessage = (matchUpdateIdResult?.groups?.get(1)?.value) ?: continue
 
-        if (startUpdateId == -1 || endUpdateId == -1) continue
-
-        val updateIdString = updates.substring(startUpdateId + UPDATES_SEPARATOR_LENGTH, endUpdateId)
-        updateId = updateIdString.toInt() + 1
+        updateId = updateIdMessage.toInt() + 1
 
         val matchResult: MatchResult? = messageTextRegex.find(updates)
-        val groups = matchResult?.groups
+        val userMessage = (matchResult?.groups?.get(1)?.value)
 
-        println(groups?.get(1)?.value)
+        val chatIdResult: MatchResult? = chatIdRegex.find(updates)
+        val chatIdMessage = (chatIdResult?.groups?.get(1)?.value)
+
+        if (chatIdMessage != null && userMessage != null) {
+            try {
+                telegramBotService.sendMessage(chatIdMessage, userMessage)
+            } catch (e: Exception) {
+                println("Ошибка при отправке сообщения: ${e.message}")
+            }
+        }
     }
-}
-
-fun getUpdates(botToken: String, updateId: Int): String {
-    val client: HttpClient = HttpClient.newBuilder().build()
-    val urlGetUpdates = "https://api.telegram.org/bot$botToken/getUpdates?offset=$updateId"
-    val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
-    val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
-
-    return response.body()
 }
