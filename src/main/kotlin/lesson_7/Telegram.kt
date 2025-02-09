@@ -10,6 +10,7 @@ const val GET_UPDATES_DELAY_MILLISECONDS = 2000
 
 fun main(args: Array<String>) {
     var updateId = 0
+    val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
 
     while (true) {
         Thread.sleep(GET_UPDATES_DELAY_MILLISECONDS.toLong())
@@ -25,7 +26,6 @@ fun main(args: Array<String>) {
         val updateIdString = updates.substring(startUpdateId + UPDATES_SEPARATOR_LENGTH, endUpdateId)
         updateId = updateIdString.toInt() + 1
 
-        val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
         val matchResult: MatchResult? = messageTextRegex.find(updates)
         val groups = matchResult?.groups
 
