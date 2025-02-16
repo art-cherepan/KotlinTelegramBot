@@ -1,4 +1,4 @@
-package lesson_7
+package english_bot
 
 import java.net.http.HttpClient
 

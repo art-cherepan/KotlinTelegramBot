@@ -1,4 +1,4 @@
-package lesson_7
+package english_bot
 
 import java.io.IOException
 import java.net.URI
@@ -22,8 +22,8 @@ class TelegramBotService(
 
     fun sendMessage(chatId: String, message: String) {
         val encodeMessage = java.net.URLEncoder.encode(message, "utf-8") //если русский текст, то почему-то выдает Unicode
-        val urlGetUpdates = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$encodeMessage"
-        val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
+        val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage?chat_id=$chatId&text=$encodeMessage"
+        val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
 
         try {
             client.send(request, HttpResponse.BodyHandlers.ofString())
