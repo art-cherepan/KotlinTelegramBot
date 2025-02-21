@@ -33,4 +33,41 @@ class TelegramBotService(
             throw Exception("HttpClient send message error: ${e.message}")
         }
     }
+
+    fun sendMenu(chatId: String) {
+        val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage"
+        val sendMenuBody = """
+            {
+                "chat_id": $chatId,
+                "text": "Основное меню",
+                "reply_markup": {
+                    "inline_keyboard": [
+                        [
+                            {
+                                "text": "Изучить слова",
+                                "callback_data": "learn_words_clicked"
+                            },
+                            {
+                                "text": "Статистика",
+                                "callback_data": "statistic_clicked"
+                            }
+                        ]
+                    ]
+                }
+            } 
+        """.trimIndent()
+
+        val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
+            .header("Content-type", "application/json ")
+            .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
+            .build()
+
+        try {
+            client.send(request, HttpResponse.BodyHandlers.ofString())
+        } catch (e: IOException) {
+            throw Exception("HttpClient send message error: ${e.message}")
+        } catch (e: InterruptedException) {
+            throw Exception("HttpClient send message error: ${e.message}")
+        }
+    }
 }
