@@ -7,11 +7,12 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 const val API_TELEGRAM_BOT = "https://api.telegram.org/bot"
+const val BOT_STATISTIC_BUTTON_CLICKED_DATA = "statistic_clicked"
+const val BOT_LEARN_WORDS_BUTTON_CLICKED_DATA = "learn_words_clicked"
 
-class TelegramBotService(
-    private val client: HttpClient,
-    private val botToken: String,
-) {
+class TelegramBotService(private val botToken: String) {
+    private val client: HttpClient = HttpClient.newBuilder().build()
+
     fun getUpdates(updateId: Int): String {
         val urlGetUpdates = "$API_TELEGRAM_BOT$botToken/getUpdates?offset=$updateId"
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
@@ -20,7 +21,7 @@ class TelegramBotService(
         return response.body()
     }
 
-    fun sendMessage(chatId: String, message: String) {
+    fun sendMessage(chatId: Int, message: String) {
         val encodeMessage = java.net.URLEncoder.encode(message, "utf-8") //если русский текст, то почему-то выдает Unicode
         val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage?chat_id=$chatId&text=$encodeMessage"
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
@@ -34,7 +35,7 @@ class TelegramBotService(
         }
     }
 
-    fun sendMenu(chatId: String) {
+    fun sendMenu(chatId: Int) {
         val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage"
         val sendMenuBody = """
             {
@@ -45,11 +46,11 @@ class TelegramBotService(
                         [
                             {
                                 "text": "Изучить слова",
-                                "callback_data": "learn_words_clicked"
+                                "callback_data": "$BOT_LEARN_WORDS_BUTTON_CLICKED_DATA"
                             },
                             {
                                 "text": "Статистика",
-                                "callback_data": "statistic_clicked"
+                                "callback_data": "$BOT_STATISTIC_BUTTON_CLICKED_DATA"
                             }
                         ]
                     ]
