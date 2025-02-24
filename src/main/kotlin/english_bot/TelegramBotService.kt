@@ -21,7 +21,7 @@ class TelegramBotService(private val botToken: String) {
         return response.body()
     }
 
-    fun sendMessage(chatId: Int, message: String) {
+    fun sendMessage(chatId: Long, message: String) {
         val encodeMessage = java.net.URLEncoder.encode(message, "utf-8") //если русский текст, то почему-то выдает Unicode
         val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage?chat_id=$chatId&text=$encodeMessage"
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
@@ -35,7 +35,7 @@ class TelegramBotService(private val botToken: String) {
         }
     }
 
-    fun sendMenu(chatId: Int) {
+    fun sendMenu(chatId: Long) {
         val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage"
         val sendMenuBody = """
             {

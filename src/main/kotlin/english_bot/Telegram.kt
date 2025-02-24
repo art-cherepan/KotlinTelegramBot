@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
         val userMessage = (matchMessageTextResult?.groups?.get(1)?.value)
 
         val matchChatIdResult: MatchResult? = chatIdRegex.find(updates)
-        val chatIdMessage = (matchChatIdResult?.groups?.get(1)?.value?.toIntOrNull()) ?: continue
+        val chatIdMessage = (matchChatIdResult?.groups?.get(1)?.value?.toLongOrNull()) ?: continue
 
         if (userMessage?.lowercase() == BOT_START_COMMAND) {
             try {
