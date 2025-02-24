@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
 
     val telegramBotService = TelegramBotService(botToken = args[0])
 
-   // val trainer: LearnWordsTrainer = LearnWordsTrainer()
+    val trainer = LearnWordsTrainer()
 
     while (true) {
         Thread.sleep(GET_UPDATES_DELAY_MILLISECONDS.toLong())
@@ -44,7 +44,8 @@ fun main(args: Array<String>) {
 
         if (dataMessage.lowercase() == BOT_STATISTIC_BUTTON_CLICKED_DATA) {
             try {
-                telegramBotService.sendMessage(chatIdMessage, "clicked statistic button")
+                val statistic = trainer.getStatistics()
+                telegramBotService.sendMessage(chatIdMessage, "Выучено ${statistic.learned} из ${statistic.total} слов | ${statistic.percent}%")
             } catch (e: Exception) {
                 println("Ошибка при отправке сообщения: ${e.message}")
             }
