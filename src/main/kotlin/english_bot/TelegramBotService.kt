@@ -6,9 +6,10 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-const val API_TELEGRAM_BOT = "https://api.telegram.org/bot"
 const val BOT_STATISTIC_BUTTON_CLICKED_DATA = "statistic_clicked"
 const val BOT_LEARN_WORDS_BUTTON_CLICKED_DATA = "learn_words_clicked"
+private const val API_TELEGRAM_BOT = "https://api.telegram.org/bot"
+private const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 
 class TelegramBotService(private val botToken: String) {
     private val client: HttpClient = HttpClient.newBuilder().build()
@@ -61,6 +62,40 @@ class TelegramBotService(private val botToken: String) {
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
             .header("Content-type", "application/json ")
             .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
+            .build()
+
+        try {
+            client.send(request, HttpResponse.BodyHandlers.ofString())
+        } catch (e: IOException) {
+            throw Exception("HttpClient send message error: ${e.message}")
+        } catch (e: InterruptedException) {
+            throw Exception("HttpClient send message error: ${e.message}")
+        }
+    }
+
+    fun sendQuestion(chatId: Long, question: Question?) {
+        val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage"
+        val answers: MutableList<String> = mutableListOf()
+
+        question?.variants?.forEachIndexed { index, variant ->
+            answers.add("{\"text\":\"${variant.translate}\",\"callback_data\":\"${CALLBACK_DATA_ANSWER_PREFIX + index}\"}")
+        }
+
+        val sendQuestionBody = """
+            {
+                "chat_id": $chatId,
+                "text": "${question?.correctAnswer?.original}",
+                "reply_markup": {
+                    "inline_keyboard": [
+                        [${answers.joinToString(separator = ",")}]
+                    ]
+                }
+            }
+        """.trimIndent()
+
+        val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
+            .header("Content-type", "application/json ")
+            .POST(HttpRequest.BodyPublishers.ofString(sendQuestionBody))
             .build()
 
         try {
