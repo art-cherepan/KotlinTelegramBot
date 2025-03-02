@@ -1,7 +1,8 @@
 package english_bot
 
-const val GET_UPDATES_DELAY_MILLISECONDS = 2000
-const val BOT_START_COMMAND = "/start"
+private const val GET_UPDATES_DELAY_MILLISECONDS = 2000
+private const val ALL_WORDS_ARE_LEARNED_MESSAGE = "Все слова в словаре выучены"
+private const val BOT_START_COMMAND = "/start"
 
 fun main(args: Array<String>) {
     var updateId = 0
@@ -45,7 +46,10 @@ fun main(args: Array<String>) {
         if (dataMessage.lowercase() == BOT_STATISTIC_BUTTON_CLICKED_DATA) {
             try {
                 val statistic = trainer.getStatistics()
-                telegramBotService.sendMessage(chatIdMessage, "Выучено ${statistic.learned} из ${statistic.total} слов | ${statistic.percent}%")
+                telegramBotService.sendMessage(
+                    chatId = chatIdMessage,
+                    message = "Выучено ${statistic.learned} из ${statistic.total} слов | ${statistic.percent}%",
+                )
             } catch (e: Exception) {
                 println("Ошибка при отправке сообщения: ${e.message}")
             }
@@ -53,10 +57,30 @@ fun main(args: Array<String>) {
 
         if (dataMessage.lowercase() == BOT_LEARN_WORDS_BUTTON_CLICKED_DATA) {
             try {
-                telegramBotService.sendMessage(chatIdMessage, "clicked learn words button")
+                checkNextQuestionAndSend(
+                    trainer = trainer,
+                    telegramBotService = telegramBotService,
+                    chatId = chatIdMessage,
+                )
             } catch (e: Exception) {
                 println("Ошибка при отправке сообщения: ${e.message}")
             }
         }
     }
+}
+
+fun checkNextQuestionAndSend(
+    trainer: LearnWordsTrainer,
+    telegramBotService: TelegramBotService,
+    chatId: Long,
+) {
+    val nextQuestion: Question? = trainer.getNextQuestion()
+
+    if (nextQuestion == null) {
+        telegramBotService.sendMessage(chatId, ALL_WORDS_ARE_LEARNED_MESSAGE)
+
+        return
+    }
+
+    telegramBotService.sendQuestion(chatId, nextQuestion)
 }
