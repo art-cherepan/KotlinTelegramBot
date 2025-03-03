@@ -66,6 +66,25 @@ fun main(args: Array<String>) {
                 println("Ошибка при отправке сообщения: ${e.message}")
             }
         }
+
+        if  (dataMessage.lowercase().startsWith(CALLBACK_DATA_ANSWER_PREFIX)) {
+            val answerIndex = dataMessage.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toIntOrNull()
+
+            if (trainer.checkAnswer(answerIndex)) {
+                telegramBotService.sendMessage(chatId = chatIdMessage, message = "Правильно!")
+            } else {
+                telegramBotService.sendMessage(
+                    chatId = chatIdMessage,
+                    message = "Неправильно! ${trainer.getQuestion()?.correctAnswer?.original} - это ${trainer.getQuestion()?.correctAnswer?.translate}",
+                )
+            }
+
+            checkNextQuestionAndSend(
+                trainer = trainer,
+                telegramBotService = telegramBotService,
+                chatId = chatIdMessage,
+            )
+        }
     }
 }
 
