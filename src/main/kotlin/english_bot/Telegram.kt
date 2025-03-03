@@ -69,13 +69,15 @@ fun main(args: Array<String>) {
 
         if  (dataMessage.lowercase().startsWith(CALLBACK_DATA_ANSWER_PREFIX)) {
             val answerIndex = dataMessage.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toIntOrNull()
+            val correctAnswerMessage = "Правильно!"
+            val incorrectAnswerMessage = "Неправильно! ${trainer.getQuestion()?.correctAnswer?.original} - это ${trainer.getQuestion()?.correctAnswer?.translate}"
 
             if (trainer.checkAnswer(answerIndex)) {
-                telegramBotService.sendMessage(chatId = chatIdMessage, message = "Правильно!")
+                telegramBotService.sendMessage(chatId = chatIdMessage, message = correctAnswerMessage)
             } else {
                 telegramBotService.sendMessage(
                     chatId = chatIdMessage,
-                    message = "Неправильно! ${trainer.getQuestion()?.correctAnswer?.original} - это ${trainer.getQuestion()?.correctAnswer?.translate}",
+                    message = incorrectAnswerMessage
                 )
             }
 
