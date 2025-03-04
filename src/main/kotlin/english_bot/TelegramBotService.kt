@@ -8,8 +8,8 @@ import java.net.http.HttpResponse
 
 const val BOT_STATISTIC_BUTTON_CLICKED_DATA = "statistic_clicked"
 const val BOT_LEARN_WORDS_BUTTON_CLICKED_DATA = "learn_words_clicked"
+const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 private const val API_TELEGRAM_BOT = "https://api.telegram.org/bot"
-private const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 
 class TelegramBotService(private val botToken: String) {
     private val client: HttpClient = HttpClient.newBuilder().build()

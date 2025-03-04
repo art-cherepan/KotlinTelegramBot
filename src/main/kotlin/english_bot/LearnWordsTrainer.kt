@@ -74,6 +74,10 @@ class LearnWordsTrainer (
         } ?: false
     }
 
+    fun getQuestion(): Question? {
+        return question
+    }
+
     private fun loadDictionary(): List<Word> {
         try {
             val dictionary: MutableList<Word> = mutableListOf()
