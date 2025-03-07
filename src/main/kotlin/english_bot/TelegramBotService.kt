@@ -1,5 +1,6 @@
 package english_bot
 
+import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.net.URI
 import java.net.http.HttpClient
@@ -14,7 +15,7 @@ private const val API_TELEGRAM_BOT = "https://api.telegram.org/bot"
 class TelegramBotService(private val botToken: String) {
     private val client: HttpClient = HttpClient.newBuilder().build()
 
-    fun getUpdates(updateId: Int): String {
+    fun getUpdates(updateId: Long): String {
         val urlGetUpdates = "$API_TELEGRAM_BOT$botToken/getUpdates?offset=$updateId"
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
         val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
@@ -22,13 +23,22 @@ class TelegramBotService(private val botToken: String) {
         return response.body()
     }
 
-    fun sendMessage(chatId: Long, message: String) {
+    fun sendMessage(chatId: Long, message: String, json: Json ) {
+        val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage"
         val encodeMessage = java.net.URLEncoder.encode(message, "utf-8") //если русский текст, то почему-то выдает Unicode
-        val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage?chat_id=$chatId&text=$encodeMessage"
-        val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
+        val requestBody = SendMessageRequest(
+            chatId = chatId,
+            text = encodeMessage,
+        )
+
+        val requestBodyString = json.encodeToString(requestBody)
+        val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
+            .header("Content-type", "application/json ")
+            .POST(HttpRequest.BodyPublishers.ofString(requestBodyString))
+            .build()
 
         try {
-            client.send(request, HttpResponse.BodyHandlers.ofString())
+            client.send(request, HttpResponse.BodyHandlers.ofString()) //русский текст отображается кракозябрами
         } catch (e: IOException) {
             throw Exception("HttpClient send message error: ${e.message}")
         } catch (e: InterruptedException) {
@@ -36,32 +46,31 @@ class TelegramBotService(private val botToken: String) {
         }
     }
 
-    fun sendMenu(chatId: Long) {
+    fun sendMenu(chatId: Long, json: Json) {
         val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage"
-        val sendMenuBody = """
-            {
-                "chat_id": $chatId,
-                "text": "Основное меню",
-                "reply_markup": {
-                    "inline_keyboard": [
-                        [
-                            {
-                                "text": "Изучить слова",
-                                "callback_data": "$BOT_LEARN_WORDS_BUTTON_CLICKED_DATA"
-                            },
-                            {
-                                "text": "Статистика",
-                                "callback_data": "$BOT_STATISTIC_BUTTON_CLICKED_DATA"
-                            }
-                        ]
-                    ]
-                }
-            } 
-        """.trimIndent()
+
+        val requestBody = SendMessageRequest(
+            chatId = chatId,
+            text = "Основное меню",
+            replyMarkup = ReplyMarkup(
+                listOf(listOf(
+                    InlineKeyboard(
+                        text = "Изучать слова",
+                        callbackData = BOT_LEARN_WORDS_BUTTON_CLICKED_DATA,
+                    ),
+                    InlineKeyboard(
+                        text = "Статистика",
+                        callbackData = BOT_STATISTIC_BUTTON_CLICKED_DATA,
+                    ),
+                ))
+            )
+        )
+
+        val requestBodyString = json.encodeToString(requestBody)
 
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
             .header("Content-type", "application/json ")
-            .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
+            .POST(HttpRequest.BodyPublishers.ofString(requestBodyString))
             .build()
 
         try {
@@ -73,7 +82,7 @@ class TelegramBotService(private val botToken: String) {
         }
     }
 
-    fun sendQuestion(chatId: Long, question: Question?) {
+    fun sendQuestion(chatId: Long, question: Question?, json: Json) {
         val urlSendMessage = "$API_TELEGRAM_BOT$botToken/sendMessage"
         val answers: MutableList<String> = mutableListOf()
 
@@ -81,21 +90,26 @@ class TelegramBotService(private val botToken: String) {
             answers.add("{\"text\":\"${variant.translate}\",\"callback_data\":\"${CALLBACK_DATA_ANSWER_PREFIX + index}\"}")
         }
 
-        val sendQuestionBody = """
-            {
-                "chat_id": $chatId,
-                "text": "${question?.correctAnswer?.original}",
-                "reply_markup": {
-                    "inline_keyboard": [
-                        [${answers.joinToString(separator = ",")}]
-                    ]
-                }
-            }
-        """.trimIndent()
+        val requestBody = question?.correctAnswer?.let {
+            SendMessageRequest(
+                chatId = chatId,
+                text = it.original,
+                replyMarkup = ReplyMarkup(
+                    listOf(question.variants.mapIndexed { index, word ->
+                         InlineKeyboard(
+                             text = word.translate,
+                             callbackData = "$CALLBACK_DATA_ANSWER_PREFIX$index",
+                         )
+                    })
+                )
+            )
+        }
+
+        val requestBodyString = json.encodeToString(requestBody)
 
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
             .header("Content-type", "application/json ")
-            .POST(HttpRequest.BodyPublishers.ofString(sendQuestionBody))
+            .POST(HttpRequest.BodyPublishers.ofString(requestBodyString))
             .build()
 
         try {
