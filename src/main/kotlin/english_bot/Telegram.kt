@@ -134,7 +134,11 @@ fun main(args: Array<String>) {
             val incorrectAnswerMessage = "Неправильно! ${trainer.getQuestion()?.correctAnswer?.original} - это ${trainer.getQuestion()?.correctAnswer?.translate}"
 
             if (trainer.checkAnswer(answerIndex)) {
-                telegramBotService.sendMessage(chatId = chatId, message = correctAnswerMessage, json = json)
+                telegramBotService.sendMessage(
+                    chatId = chatId,
+                    message = correctAnswerMessage,
+                    json = json,
+                )
             } else {
                 telegramBotService.sendMessage(
                     chatId = chatId,
