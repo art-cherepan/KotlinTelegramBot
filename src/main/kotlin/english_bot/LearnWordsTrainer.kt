@@ -2,8 +2,6 @@ package english_bot
 
 import java.io.File
 
-const val WORDS_FILE_NAME = "words.txt"
-
 data class Word(
     val original: String,
     val translate: String,
@@ -22,6 +20,7 @@ data class Question(
 )
 
 class LearnWordsTrainer (
+    private val fileName: String = "words.txt",
     private val learnedAnswerCount: Int = 3,
     private val countOfQuestionWords: Int = 4,
 ) {
@@ -67,7 +66,7 @@ class LearnWordsTrainer (
 
             if (correctAnswerId == userAnswerIndex) {
                 it.correctAnswer.correctAnswersCount++
-                saveDictionary(dictionary)
+                saveDictionary()
 
                 true
             } else false
@@ -81,7 +80,11 @@ class LearnWordsTrainer (
     private fun loadDictionary(): List<Word> {
         try {
             val dictionary: MutableList<Word> = mutableListOf()
-            val wordsFile = File(WORDS_FILE_NAME)
+            val wordsFile = File(fileName)
+
+            if (!wordsFile.exists()) {
+                File("words.txt").copyTo(wordsFile)
+            }
 
             wordsFile.forEachLine {
                 val line = it.split("|")
@@ -101,11 +104,16 @@ class LearnWordsTrainer (
         }
     }
 
-    private fun saveDictionary(dictionary: List<Word>) {
-        File(WORDS_FILE_NAME).bufferedWriter().use { writer ->
+    private fun saveDictionary() {
+        File(fileName).bufferedWriter().use { writer ->
             dictionary.forEach {
                 writer.write("${it.original}|${it.translate}|${it.correctAnswersCount}\n")
             }
         }
+    }
+
+    fun resetProgress() {
+        dictionary.forEach { it.correctAnswersCount = 0 }
+        saveDictionary()
     }
 }
