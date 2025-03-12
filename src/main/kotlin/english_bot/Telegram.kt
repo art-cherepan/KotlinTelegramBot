@@ -101,7 +101,12 @@ fun main(args: Array<String>) {
     }
 }
 
-fun handleUpdate(update: Update, json: Json, telegramBotService: TelegramBotService, trainers: HashMap<Long, LearnWordsTrainer>) {
+fun handleUpdate(
+    update: Update,
+    json: Json,
+    telegramBotService: TelegramBotService,
+    trainers: HashMap<Long, LearnWordsTrainer>,
+) {
     val message = update.message?.text
     val chatId = update.message?.chat?.id ?: update.callbackQuery?.message?.chat?.id ?: return
     val data = update.callbackQuery?.data
