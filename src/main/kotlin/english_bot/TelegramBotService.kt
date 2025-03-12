@@ -38,16 +38,24 @@ class TelegramBotService(private val botToken: String) {
             chatId = chatId,
             text = "Основное меню",
             replyMarkup = ReplyMarkup(
-                listOf(listOf(
-                    InlineKeyboard(
-                        text = "Изучать слова",
-                        callbackData = BOT_LEARN_WORDS_BUTTON_CLICKED_DATA,
+                listOf(
+                    listOf(
+                        InlineKeyboard(
+                            text = "Изучать слова",
+                            callbackData = BOT_LEARN_WORDS_BUTTON_CLICKED_DATA,
+                        ),
+                        InlineKeyboard(
+                            text = "Статистика",
+                            callbackData = BOT_STATISTIC_BUTTON_CLICKED_DATA,
+                        ),
                     ),
-                    InlineKeyboard(
-                        text = "Статистика",
-                        callbackData = BOT_STATISTIC_BUTTON_CLICKED_DATA,
-                    ),
-                ))
+                    listOf(
+                        InlineKeyboard(
+                            text = "Сбросить прогресс",
+                            callbackData = RESET_CLICKED ,
+                        ),
+                    )
+                )
             )
         )
 
