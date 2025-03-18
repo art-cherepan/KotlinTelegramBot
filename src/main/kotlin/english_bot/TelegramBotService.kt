@@ -1,7 +1,6 @@
 package english_bot
 
 import kotlinx.serialization.json.Json
-import java.io.IOException
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -95,10 +94,8 @@ class TelegramBotService(private val botToken: String) {
 
         try {
             client.send(request, HttpResponse.BodyHandlers.ofString())
-        } catch (e: IOException) {
-            throw Exception("HttpClient send message error: ${e.message}")
-        } catch (e: InterruptedException) {
-            throw Exception("HttpClient send message error: ${e.message}")
+        } catch (e: Exception) {
+            println("HttpClient send message error: ${e.message}")
         }
     }
 }
