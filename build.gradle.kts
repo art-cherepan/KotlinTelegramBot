@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm") version "2.1.0" // or kotlin("multiplatform") or any other kotlin plugin
     kotlin("plugin.serialization") version "2.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
 
 group = "org.example"
@@ -20,4 +22,8 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(21)
+}
+
+application {
+    mainClass.set("english_bot/TelegramKt")
 }
